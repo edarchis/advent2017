@@ -11,7 +11,7 @@ fun main(args: Array<String>) {
     val input = File("day06/input.txt")
             .bufferedReader()
             .use { it.readText() }
-            .split("\\s".toRegex())
+            .split("\t".toRegex())
             .map { it.toInt() }
             .toIntArray()
     println("input ${input.count()} items gives: " + relocate(input))
@@ -19,10 +19,10 @@ fun main(args: Array<String>) {
 
 fun relocate(banks: IntArray): Int {
     var steps = 0
-    var banksTrail: MutableList<IntArray> = mutableListOf()
+    var banksTrail: MutableList<List<Int>> = mutableListOf()
 
     do {
-        banksTrail.add(banks.copyOf())
+        banksTrail.add(banks.toList())
         val maxBankIndex = getMaxBankIndex(banks)
         val valueToRelocate = banks[maxBankIndex]
         // println("maxBankIndex: $maxBankIndex with value $valueToRelocate")
@@ -32,7 +32,7 @@ fun relocate(banks: IntArray): Int {
         }
         //println("step $step banks: ${banks.joinToString()}")
         steps++
-    } while (banks !in banksTrail)
+    } while (banks.toList() !in banksTrail)
 
     return steps
 }
