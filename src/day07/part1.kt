@@ -43,6 +43,7 @@ fun loadNodes(fileName: String): List<Node> {
     val reader = File(fileName).bufferedReader()
     return reader.readLines().map {
         val values = "([a-z]*) [(](.*)[)]( -> (.*))?".toRegex().matchEntire(it)!!.groupValues
-        Node(values[1], values[2].toInt(), values[4].split(", "))
+        // "".split(", ") will give [""] instead of []
+        Node(values[1], values[2].toInt(), if (values[4].isNotEmpty()) values[4].split(", ") else listOf())
     }
 }
