@@ -16,63 +16,63 @@ data class Instruction(
         val operand2: String)
 
 data class CPU(
-        var registers: MutableMap<String, Int> = mutableMapOf(),
-        var lastSound: Int = 0,
+        var registers: MutableMap<String, Long> = mutableMapOf(),
+        var lastSound: Long = 0,
         var end: Boolean = false
 )
 
 val action = hashMapOf(
         "set" to { cpu: CPU, inst: Instruction ->
             cpu.registers[inst.operand1] = getValueFromExpression(inst.operand2, cpu.registers)
-            1
+            1L
         },
         "add" to { cpu: CPU, inst: Instruction ->
-            val value = getValueFromExpression(inst.operand1, cpu.registers)
-            cpu.registers[inst.operand1] = value + getValueFromExpression(inst.operand2, cpu.registers)
-            1
+            cpu.registers[inst.operand1] = getValueFromExpression(inst.operand1, cpu.registers) +
+                    getValueFromExpression(inst.operand2, cpu.registers)
+            1L
         },
         "mul" to { cpu: CPU, inst: Instruction ->
-            val value = getValueFromExpression(inst.operand1, cpu.registers)
-            cpu.registers[inst.operand1] = value * getValueFromExpression(inst.operand2, cpu.registers)
-            1
+            cpu.registers[inst.operand1] = getValueFromExpression(inst.operand1, cpu.registers) *
+                    getValueFromExpression(inst.operand2, cpu.registers)
+            1L
         },
         "mod" to { cpu: CPU, inst: Instruction ->
-            val value = getValueFromExpression(inst.operand1, cpu.registers)
-            cpu.registers[inst.operand1] = value % getValueFromExpression(inst.operand2, cpu.registers)
-            1
+            cpu.registers[inst.operand1] = getValueFromExpression(inst.operand1, cpu.registers) %
+                    getValueFromExpression(inst.operand2, cpu.registers)
+            1L
         },
         "snd" to { cpu: CPU, inst: Instruction ->
             cpu.lastSound = getValueFromExpression(inst.operand1, cpu.registers)
-            1
+            1L
         },
         "rcv" to { cpu: CPU, inst: Instruction ->
-            if (getValueFromExpression(inst.operand1, cpu.registers) != 0) {
+            if (getValueFromExpression(inst.operand1, cpu.registers) != 0L) {
                 cpu.registers[inst.operand1] = cpu.lastSound
                 cpu.end = true
             }
-            1
+            1L
         },
         "jgz" to { cpu: CPU, inst: Instruction ->
-            if (getValueFromExpression(inst.operand1, cpu.registers) > 0) {
+            if (getValueFromExpression(inst.operand1, cpu.registers) > 0L) {
                 getValueFromExpression(inst.operand2, cpu.registers)
             } else {
-                1
+                1L
             }
         }
 )
 
-fun getValueFromExpression (expression: String, registers: MutableMap<String, Int>): Int {
-    return expression.toIntOrNull() ?: registers.getOrDefault(expression, 0)
+fun getValueFromExpression(expression: String, registers: MutableMap<String, Long>): Long {
+    return expression.toLongOrNull() ?: registers.getOrDefault(expression, 0L)
 }
 
-fun execute(program: List<Instruction>): Int {
+fun execute(program: List<Instruction>): Long {
     val cpu = CPU()
     var eip = 0
 
-    while (!cpu.end) {
+    while (!cpu.end && eip in program.indices) {
         val instruction = program[eip]
         val increment = action[instruction.operation]!!(cpu, instruction)
-        eip += increment
+        eip += increment.toInt()
     }
     return cpu.lastSound
 }
